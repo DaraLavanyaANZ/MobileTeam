@@ -1,0 +1,25 @@
+{
+  "qa": {
+    "validUser": {
+      "email": "Test11@gmail.com",
+      "username": "Test11@gmail.com",
+      "password": "Test@123"
+    },
+    "invalidUser": {
+      "username": "qauser2",
+      "password": "WrongPass!"
+    }
+  },
+  "sit": {
+    "validUser": {
+      "username": "situser1",
+      "password": "Password@123"
+    }
+  },
+  "uat": {
+    "validUser": {
+      "username": "uatuser1",
+      "password": "Password@123"
+    }
+  }
+}

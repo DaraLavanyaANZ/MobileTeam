@@ -1,0 +1,40 @@
+trigger:
+  - main
+
+pr:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '18.x'
+  PLATFORM: 'android'
+  ENVIRONMENT: 'qa'
+  DEVICE_NAME: 'Pixel_7_Pro'
+  APPIUM_HOST: '127.0.0.1'
+  APPIUM_PORT: '4723'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(nodeVersion)'
+
+  - script: npm install
+    displayName: 'Install dependencies'
+
+  - script: npm run type-check
+    displayName: 'TypeScript validation'
+
+  - script: npm run test:smoke
+    displayName: 'Run mobile smoke suite'
+
+  - script: npm run report:allure
+    displayName: 'Generate Allure report'
+    condition: always()
+
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'reports'
+      artifact: 'mobile-test-reports'
+    condition: always()
