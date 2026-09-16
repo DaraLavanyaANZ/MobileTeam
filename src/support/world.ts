@@ -1,72 +1,75 @@
-import { IWorldOptions, World, setDefaultTimeout, setWorldConstructor } from '@cucumber/cucumber';
-import type { Browser } from 'webdriverio';
+import { World, IWorldOptions, setWorldConstructor, setDefaultTimeout } from '@cucumber/cucumber';
+import { chromium, Browser, Page, BrowserContext, devices } from 'playwright';
+import { mobileConfig } from '../../config';
 
 setDefaultTimeout(90000);
 
-export class MyBankingAndroidWorld extends World {
-  driver!: Browser;
+const configuredDevices = (process.env.MOBILE_DEVICES || process.env.DEVICE || 'iPad')
+  .split(',')
+  .map((name) => name.trim())
+  .filter(Boolean);
+
+export class MobileWorld extends World {
+  browser!: Browser;
+  context!: BrowserContext;
+  page!: Page;
+  deviceName!: string;
+  visualBaselineFailures: string[] = [];
 
   constructor(options: IWorldOptions) {
     super(options);
-    this.driver = browser as Browser;
   }
 
-  async initialize(): Promise<void> {
-    this.driver = browser as Browser;
-  }
-
-  async dispose(): Promise<void> {
-    return;
-  }
-
-  async dismissKnownSystemDialogs(): Promise<boolean> {
-    const candidateButtons = [
-      'android:id/button2',
-      'android:id/button1',
-      'android:id/aerr_wait',
-      'android:id/aerr_close'
-    ];
-
-    for (const selector of candidateButtons) {
-      try {
-        const button = await this.driver.$(`id=${selector}`);
-        if (await button.isDisplayed()) {
-          await button.click();
-          await this.driver.pause(1500);
-          return true;
-        }
-      } catch {
-        // continue searching for the next dialog button
-      }
+  async waitForLoginScreen(timeoutMs = 15000): Promise<boolean> {
+    try {
+      await this.page.waitForSelector('input[name="username"], input[name="password"], input[value="Log In"]', {
+        timeout: timeoutMs,
+      });
+      return true;
+    } catch {
+      return false;
     }
-
-    return false;
   }
 
-  async waitForLoginScreen(timeout = 30000): Promise<boolean> {
-    const loginFields = ['com.app.hemanthbank:id/edit_identifier', 'com.app.hemanthbank:id/edit_password'];
-    const start = Date.now();
+  async initialize(profile?: 'android' | 'ios') {
+    this.browser = await chromium.launch({
+      headless: mobileConfig.headless,
+      slowMo: Number.isFinite(mobileConfig.slowMoMs) && mobileConfig.slowMoMs > 0 ? mobileConfig.slowMoMs : 0,
+    });
+    await this.useProfile(profile);
+  }
 
-    while (Date.now() - start < timeout) {
-      for (const selector of loginFields) {
-        try {
-          const element = await this.driver.$(`id=${selector}`);
-          if (await element.isDisplayed()) {
-            return true;
-          }
-        } catch {
-          // continue waiting
-        }
-      }
+  async useProfile(profile?: 'android' | 'ios'): Promise<void> {
+    if (this.context) await this.context.close();
+    const workerId = Number.parseInt(process.env.CUCUMBER_WORKER_ID || '0', 10);
+    const deviceIndex = Number.isNaN(workerId) ? 0 : workerId % configuredDevices.length;
+    const configuredDevice = configuredDevices[deviceIndex];
+    const profileDevice = profile === 'android' ? 'Pixel 5' : profile === 'ios' ? 'iPhone 12' : configuredDevice;
+    this.deviceName = profileDevice;
+    const deviceConfig = profileDevice in devices
+      ? devices[profileDevice as keyof typeof devices]
+      : {
+      viewport: { width: 768, height: 1024 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+      userAgent:
+        'Mozilla/5.0 (iPad; CPU OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Mobile/15E148 Safari/604.1',
+      };
+    this.context = await this.browser.newContext(deviceConfig);
+    this.page = await this.context.newPage();
+  }
 
-      const dismissed = await this.dismissKnownSystemDialogs();
-      if (!dismissed) {
-        await this.driver.pause(500);
-      }
-    }
-
-    return false;
+  async dispose() {
+    if (this.context) await this.context.close();
+    if (this.browser) await this.browser.close();
   }
 }
 
-setWorldConstructor(MyBankingAndroidWorld);
+export class MyBankingAndroidWorld extends MobileWorld {
+  async waitForLoginScreen(timeoutMs = 15000): Promise<boolean> {
+    return super.waitForLoginScreen(timeoutMs);
+  }
+}
+
+setWorldConstructor(MobileWorld);

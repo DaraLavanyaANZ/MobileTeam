@@ -1,0 +1,28 @@
+{
+  "m7": {
+    "scrollIterations": 4
+  },
+  "m8": {
+    "paymentDraft": {
+      "payeeName": "Landscape Demo Payee",
+      "street": "100 Demo Street",
+      "city": "Sydney",
+      "state": "NSW",
+      "zipCode": "2000",
+      "phoneNumber": "0400000000",
+      "accountNumber": "987654",
+      "verifyAccount": "987654",
+      "amount": "45.00"
+    }
+  },
+  "m9": {
+    "amountSeed": 50.37,
+    "amountRange": 5000
+  },
+  "m10": {
+    "amountSeed": 1000.13,
+    "amountRange": 900000,
+    "syntheticFromAccountId": "13344",
+    "syntheticToAccountId": "24455"
+  }
+}

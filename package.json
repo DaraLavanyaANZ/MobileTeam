@@ -11,10 +11,18 @@
     "appium:install:android": "appium driver install uiautomator2@2.45.1",
     "test:android": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts",
     "test:ios": "cross-env PLATFORM=ios ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts",
+    "test:features": "npx cucumber-js --config cucumber.js",
+    "test:feature": "npx cucumber-js --config cucumber.js",
+    "test:mobile": "cross-env HEADLESS=true cucumber-js --profile mobile",
+    "test:mobile:m14:report": "node scripts/m14-report.js",
+    "test:m8": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts --cucumberOpts.tagExpression='@ID-M8'",
+    "test:mobile:headed": "cross-env HEADLESS=false cucumber-js --profile mobile",
+    "test:mobile-features": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts --cucumberOpts.tagExpression='@mobile'",
     "test:smoke": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts --cucumberOpts.tagExpression='@smoke or @critical'",
     "test:regression": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts --cucumberOpts.tagExpression='@regression'",
     "test:parallel": "cross-env PLATFORM=android ENVIRONMENT=qa npx wdio src/config/wdio.conf.ts",
     "type-check": "tsc --noEmit",
+    "typecheck": "npm run type-check",
     "report:allure": "allure generate reports/allure-results --clean -o reports/allure-report && allure open reports/allure-report",
     "lint": "eslint . --ext .ts",
     "pretest": "npm run clean"
@@ -32,13 +40,16 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.1",
     "allure-commandline": "^2.31.0",
     "appium-uiautomator2-driver": "^2.45.1",
     "cross-env": "^7.0.0",
+    "playwright": "^1.63.0",
     "rimraf": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
-    "uiautomator2": "^1.0.2"
+    "uiautomator2": "^1.0.2",
+    "zod": "^3.25.76"
   }
 }

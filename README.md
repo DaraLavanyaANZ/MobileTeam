@@ -234,6 +234,30 @@ Scenario: User logs in with valid credentials
   Then the dashboard should be visible
 ```
 
+## M14 Touch Target Accessibility
+
+M14 verifies that critical mobile banking controls provide a minimum 44 pixel touch target and at least 8 pixels of spacing. Reports are written to `reports/` by default:
+
+- JSON: `reports/id-m14-touch-target-report.json`
+- CSV: `reports/id-m14-touch-target-report.csv`
+- Text: `reports/id-m14-touch-target-report.txt`
+
+Run M14 headless or headed:
+
+```bash
+npm run test:mobile -- --tags "@ID-M14"
+npm run test:mobile:headed -- --tags "@ID-M14"
+npm run test:mobile:m14:report
+```
+
+The following environment variables can override the defaults:
+
+- `MOBILE_TOUCH_TARGET_MIN_SIZE` or `TOUCH_TARGET_MIN_SIZE`
+- `MOBILE_TOUCH_TARGET_MIN_SPACING` or `TOUCH_TARGET_MIN_SPACING`
+- `MOBILE_TOUCH_REPORT_DIR`
+- `MOBILE_TOUCH_REPORT_BASENAME`
+- `MOBILE_TOUCH_REPORT_ENABLED`
+
 ## Best Practices Followed
 
 - POM architecture for maintainability
